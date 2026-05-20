@@ -69,24 +69,19 @@ class TensorlakeSandbox(BaseSandbox):
         if result.stderr:
             output = f"{output}\n{result.stderr}" if output else result.stderr
 
-        max_execute_bytes = 100_000
-        truncated = False
-        if len(output.encode("utf-8")) > max_execute_bytes:
-            truncated_bytes = output.encode("utf-8")[:max_execute_bytes]
-            output = (
-                truncated_bytes.decode("utf-8", errors="ignore")
-                + f"\n\n... Output truncated at {max_execute_bytes} bytes."
-            )
-            truncated = True
-
         return ExecuteResponse(
             output=output,
             exit_code=result.exit_code,
-            truncated=truncated,
+            truncated=False,
         )
 
     def write(self, file_path: str, content: str) -> WriteResult:
         """Write file contents through Tensorlake native write_file."""
+        try:
+            self._sandbox.read_file(file_path)
+            return WriteResult(error=f"File '{file_path}' already exists")
+        except TensorlakeSandboxError:
+            pass
         try:
             self._sandbox.write_file(file_path, content.encode("utf-8"))
             return WriteResult(path=file_path)
@@ -131,6 +126,8 @@ class TensorlakeSandbox(BaseSandbox):
             text = raw.decode("utf-8", errors="replace")
 
         lines = text.splitlines()
+        if not lines:
+            return ReadResult(file_data=FileData(content="", encoding="utf-8"))
         if offset >= len(lines):
             return ReadResult(
                 error=f"Line offset {offset} exceeds file length ({len(lines)} lines)"

@@ -69,11 +69,14 @@ class TensorlakeSandbox(BaseSandbox):
         if result.stderr:
             output = f"{output}\n{result.stderr}" if output else result.stderr
 
-        _MAX_EXECUTE_BYTES = 100_000
+        max_execute_bytes = 100_000
         truncated = False
-        if len(output.encode("utf-8")) > _MAX_EXECUTE_BYTES:
-            output = output.encode("utf-8")[:_MAX_EXECUTE_BYTES].decode("utf-8", errors="ignore")
-            output += f"\n\n... Output truncated at {_MAX_EXECUTE_BYTES} bytes."
+        if len(output.encode("utf-8")) > max_execute_bytes:
+            truncated_bytes = output.encode("utf-8")[:max_execute_bytes]
+            output = (
+                truncated_bytes.decode("utf-8", errors="ignore")
+                + f"\n\n... Output truncated at {max_execute_bytes} bytes."
+            )
             truncated = True
 
         return ExecuteResponse(
@@ -100,11 +103,19 @@ class TensorlakeSandbox(BaseSandbox):
         except TensorlakeSandboxError as exc:
             return ReadResult(error=f"File '{file_path}': {exc}")
 
-        if _get_file_type(file_path) != "text":
+        is_binary = _get_file_type(file_path) != "text"
+        if not is_binary:
+            try:
+                raw.decode("utf-8")
+            except UnicodeDecodeError:
+                is_binary = True
+
+        if is_binary:
             if len(raw) > MAX_BINARY_BYTES:
                 return ReadResult(
                     error=(
-                        f"File '{file_path}': Binary file exceeds maximum preview size of {MAX_BINARY_BYTES} bytes"
+                        f"File '{file_path}': Binary file exceeds"
+                        f" maximum preview size of {MAX_BINARY_BYTES} bytes"
                     )
                 )
             return ReadResult(
@@ -117,18 +128,7 @@ class TensorlakeSandbox(BaseSandbox):
         try:
             text = raw.decode("utf-8")
         except UnicodeDecodeError:
-            if len(raw) > MAX_BINARY_BYTES:
-                return ReadResult(
-                    error=(
-                        f"File '{file_path}': Binary file exceeds maximum preview size of {MAX_BINARY_BYTES} bytes"
-                    )
-                )
-            return ReadResult(
-                file_data=FileData(
-                    content=base64.b64encode(raw).decode("ascii"),
-                    encoding="base64",
-                )
-            )
+            text = raw.decode("utf-8", errors="replace")
 
         lines = text.splitlines()
         if offset >= len(lines):
@@ -139,7 +139,10 @@ class TensorlakeSandbox(BaseSandbox):
         encoded = page.encode("utf-8")
         msg_bytes = len(TRUNCATION_MSG.encode("utf-8"))
         if len(encoded) > MAX_OUTPUT_BYTES - msg_bytes:
-            page = encoded[: MAX_OUTPUT_BYTES - msg_bytes].decode("utf-8", errors="ignore") + TRUNCATION_MSG
+            page = (
+                encoded[: MAX_OUTPUT_BYTES - msg_bytes].decode("utf-8", errors="ignore")
+                + TRUNCATION_MSG
+            )
         return ReadResult(
             file_data=FileData(
                 content=page,

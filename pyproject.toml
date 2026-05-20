@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "langchain-tensorlake"
+name = "langchain-deepagents-tensorlake"
 description = "Tensorlake sandbox integration for Deep Agents"
 license = { text = "MIT" }
 readme = "README.md"
@@ -27,11 +27,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/tensorlake/langchain-tensorlake"
-Repository = "https://github.com/tensorlake/langchain-tensorlake"
+Homepage = "https://github.com/tensorlakeai/langchain-deepagents-tensorlake"
+Repository = "https://github.com/tensorlakeai/langchain-deepagents-tensorlake"
 
 [tool.hatch.build.targets.wheel]
-packages = ["langchain_tensorlake"]
+packages = ["langchain_deepagents_tensorlake"]
 
 [tool.uv]
 constraint-dependencies = ["urllib3>=2.6.3"]

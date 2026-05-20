@@ -1,18 +1,18 @@
-# langchain-tensorlake
+# langchain-deepagents-tensorlake
 
 [Tensorlake](https://tensorlake.ai) sandbox provider for [Deep Agents](https://github.com/langchain-ai/deepagents).
 
 ## Installation
 
 ```bash
-pip install langchain-tensorlake
+pip install langchain-deepagents-tensorlake
 ```
 
 ## Usage
 
 ```python
 from tensorlake.sandbox import Sandbox
-from langchain_tensorlake import TensorlakeSandbox
+from langchain_deepagents_tensorlake import TensorlakeSandbox
 from deepagents.backends import CompositeBackend
 
 # Create a Tensorlake sandbox

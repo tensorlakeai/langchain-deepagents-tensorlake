@@ -7,7 +7,7 @@ import pytest
 from langchain_tests.integration_tests import SandboxIntegrationTests
 from tensorlake.sandbox import Sandbox
 
-from langchain_tensorlake import TensorlakeSandbox
+from langchain_deepagents_tensorlake import TensorlakeSandbox
 
 if TYPE_CHECKING:
     from collections.abc import Generator

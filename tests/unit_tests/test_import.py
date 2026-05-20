@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 from tensorlake.sandbox.exceptions import SandboxError
 
-import langchain_tensorlake
-from langchain_tensorlake.sandbox import TensorlakeSandbox
+import langchain_deepagents_tensorlake
+from langchain_deepagents_tensorlake.sandbox import TensorlakeSandbox
 
 
 def _make_sandbox() -> tuple[TensorlakeSandbox, MagicMock]:
@@ -17,7 +17,7 @@ def _make_sandbox() -> tuple[TensorlakeSandbox, MagicMock]:
 
 
 def test_import_tensorlake() -> None:
-    assert langchain_tensorlake is not None
+    assert langchain_deepagents_tensorlake is not None
 
 
 def test_execute_returns_stdout() -> None:
